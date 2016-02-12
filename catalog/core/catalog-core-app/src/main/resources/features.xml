@@ -16,6 +16,7 @@
 	<feature name="catalog-core-api" version="${project.version}"
              description="Catalog API interfaces and simple implementations.">
 		<bundle>mvn:ddf.catalog.core/catalog-core-api/${project.version}</bundle>
+		<bundle>mvn:ddf.catalog.core/catalog-core-dynamic-api/${project.version}</bundle>
 		<bundle>mvn:ddf.mime.core/mime-core-api/${project.version}</bundle>
 		<bundle>mvn:org.apache.tika/tika-core/${tika.version}</bundle>
 		<bundle>mvn:org.apache.tika/tika-bundle/${tika.version}</bundle>
@@ -44,6 +45,7 @@
 		<bundle>mvn:ddf.catalog.core/catalog-core-commands/${project.version}</bundle>
 		<bundle>mvn:ddf.catalog.core/catalog-core-metacardgroomerplugin/${project.version}</bundle>
 		<bundle>mvn:ddf.catalog.core/metacard-type-registry/${project.version}</bundle>
+		<bundle>mvn:ddf.catalog.core/catalog-core-dynamic-registry/${project.version}</bundle>
 	</feature>
 	
 	<feature name="catalog-core-standardframework" version="${project.version}"
