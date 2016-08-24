@@ -1,0 +1,22 @@
+
+package test;
+
+
+dialect "java"
+import ddf.catalog.data.Metacard;
+import ddf.catalog.data.impl.AttributeImpl;
+
+
+rule "sample"
+  when
+    m: Metacard(title == "pic.png")
+  then
+    m.setAttribute(new AttributeImpl("title", "NewTitle.png"));
+end
+
+rule "sample2"
+  when
+    m: Metacard()
+  then
+    m.setAttribute(new AttributeImpl("description", "Description to all metacards"));
+end

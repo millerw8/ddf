@@ -33,5 +33,6 @@
         <module>catalog-plugin-duplication</module>
         <module>catalog-plugin-expirationdate</module>
         <module>catalog-plugin-content-uri</module>
+        <module>catalog-plugin-inference</module>
     </modules>
 </project>

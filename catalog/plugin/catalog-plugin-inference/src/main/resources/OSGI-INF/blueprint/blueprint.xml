@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+/**
+ * Copyright (c) Codice Foundation
+ *
+ * This is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation, either
+ * version 3 of the License, or any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU Lesser General Public License for more details. A copy of the GNU Lesser General Public License is distributed along with this program and can be found at
+ * <http://www.gnu.org/licenses/lgpl.html>.
+ *
+ **/
+-->
+<blueprint xmlns:cm="http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.1.0"
+           xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0">
+
+    <bean id="droolsrules" class="ddf.catalog.metacard.inference.DroolsInference">
+        <cm:managed-properties persistent-id="ddf.catalog.metacard.inference.DroolsInference"
+                               update-strategy="container-managed"/>
+        <property name="droolsRules">
+                <value></value>
+        </property>
+    </bean>
+
+    <service ref="droolsrules">
+        <interfaces>
+            <value>ddf.catalog.plugin.PreIngestPlugin</value>
+        </interfaces>
+    </service>
+
+</blueprint>
