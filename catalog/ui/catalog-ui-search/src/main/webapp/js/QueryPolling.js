@@ -132,8 +132,8 @@ define([
 
     checkForFailures = function(responses, originalQuery, timeRange) {
         _.forEach(responses, function(response) {
-            if (response[1] === "error" || !response[0].status.successful) {
-                var srcId = JSON.parse(response[0].options.data).src;
+            if (response === "error" ||  (typeof response.status !== 'undefined' && !response.status.successful)) {
+                var srcId = JSON.parse(response.responseJSON.options.data).src;
                 addFailure(srcId, originalQuery, timeRange);
             }
         });
