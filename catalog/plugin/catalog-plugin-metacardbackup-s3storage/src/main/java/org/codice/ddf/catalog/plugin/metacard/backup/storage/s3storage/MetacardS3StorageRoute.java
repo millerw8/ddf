@@ -158,6 +158,7 @@ public class MetacardS3StorageRoute extends MetacardStorageRoute {
 
     String metacardRouteId = "metacard-" + UUID.randomUUID().toString();
     from("catalog:postingest")
+        .autoStartup(true)
         .split(method(ResponseMetacardActionSplitter.class, "split(${body})"))
         .to("direct:" + metacardRouteId);
     from("direct:" + metacardRouteId)
