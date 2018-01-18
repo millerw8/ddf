@@ -88,13 +88,18 @@ define([
         setupScheduling: function() {
             this.settingsSchedule.show(new ScheduleQueryView({
                 model: new Backbone.Model({
-                    isScheduleEnabled: this.model.get('isScheduleEnabled'),
-                    scheduleOptions: {
-                        amountValue: this.model.get('scheduleOptions').amountValue,
-                        unitValue: this.model.get('scheduleOptions').unitValue,
-                        startValue: this.model.get('scheduleOptions').startValue,
-                        endValue: this.model.get('scheduleOptions').endValue
-                    }
+                    // isScheduleEnabled: this.model.get('isScheduleEnabled'),
+                    // scheduleOptions: {
+                    //     amountValue: this.model.get('scheduleOptions').amountValue,
+                    //     unitValue: this.model.get('scheduleOptions').unitValue,
+                    //     startValue: this.model.get('scheduleOptions').startValue,
+                    //     endValue: this.model.get('scheduleOptions').endValue
+                    // }
+                    isScheduled: this.model.get('isScheduled'),
+                    scheduleAmount: this.model.get('scheduleAmount'),
+                    scheduleUnit: this.model.get('scheduleUnit'),
+                    scheduleStart: this.model.get('scheduleStart'),
+                    scheduleEnd: this.model.get('scheduleEnd')
                 })
             }));
             this.settingsSchedule.currentView.turnOffEditing();
@@ -130,8 +135,13 @@ define([
                 federation: federation,
                 sortField: sortField,
                 sortOrder: sortOrder,
-                isScheduleEnabled: scheduleConfig.isScheduleEnabled,
-                scheduleOptions: scheduleConfig.scheduleOptions
+                // isScheduleEnabled: scheduleConfig.isScheduleEnabled,
+                // scheduleOptions: scheduleConfig.scheduleOptions
+                isScheduled: scheduleConfig.isScheduled,
+                scheduleAmount: scheduleConfig.scheduleAmount,
+                scheduleUnit: scheduleConfig.scheduleUnit,
+                scheduleStart: scheduleConfig.scheduleStart,
+                scheduleEnd: scheduleConfig.scheduleEnd
             });
         },
         save: function(){

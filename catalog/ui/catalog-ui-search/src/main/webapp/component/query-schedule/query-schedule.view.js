@@ -81,10 +81,17 @@ define([
             this.listenTo(this.amountPicker.currentView.model, 'change:value', this.handleAmountPickerValue);
             this.turnOnEditing();
         },
+
+        // isScheduled: scheduleConfig.isScheduled,
+        // scheduleAmount: scheduleConfig.scheduleAmount,
+        // scheduleUnit: scheduleConfig.scheduleAmount,
+        // scheduleStart: scheduleConfig.scheduleStart,
+        // scheduleEnd: scheduleConfig.scheduleEnd
+
         setupRegions: function() {
             this.enableScheduling.show(new PropertyView({
                 model: new Property({
-                    value: [this.model.get('isScheduleEnabled') || 'off'],
+                    value: [this.model.get('isScheduled')],
                     id: 'Schedule',
                     radio: [{
                         label: 'On',
@@ -100,7 +107,7 @@ define([
 
             this.amountPicker.show(new PropertyView({
                 model: new Property({
-                    value: [this.model.get('scheduleOptions').amountValue || 1],
+                    value: [this.model.get('scheduleAmount')],
                     id: '',
                     type: 'INTEGER',
                     showValidationIssues: false,
@@ -111,7 +118,7 @@ define([
 
             this.unitPicker.show(new PropertyView({
                 model: new Property({
-                    value: [this.model.get('scheduleOptions').unitValue || 'weeks'],
+                    value: [this.model.get('scheduleUnit')],
                     id: '',
                     enum: [{
                         label: 'Months', 
@@ -137,7 +144,7 @@ define([
 
             this.startPicker.show(new PropertyView({
                 model: new Property({
-                    value: [this.model.get('scheduleOptions').startValue || ''],
+                    value: [this.model.get('scheduleStart')],
                     id: 'Starts on',
                     placeholder: 'Date and time for query to take effect',
                     type: 'DATE'
@@ -147,7 +154,7 @@ define([
 
             this.endPicker.show(new PropertyView({
                 model: new Property({
-                    value: [this.model.get('scheduleOptions').endValue || ''],
+                    value: [this.model.get('scheduleEnd')],
                     id: 'Ends on',
                     placeholder: 'Date and time for query to stop',
                     type: 'DATE'
@@ -184,13 +191,18 @@ define([
         },
         getSchedulingConfiguration: function() {
             var currentConfig = {
-                isScheduleEnabled: this.enableScheduling.currentView.model.getValue()[0],
-                scheduleOptions: {
-                    amountValue: this.amountPicker.currentView.model.getValue()[0],
-                    unitValue: this.unitPicker.currentView.model.getValue()[0],
-                    startValue: this.startPicker.currentView.model.getValue()[0],
-                    endValue: this.endPicker.currentView.model.getValue()[0]
-                }
+                // isScheduleEnabled: this.enableScheduling.currentView.model.getValue()[0],
+                // scheduleOptions: {
+                //     amountValue: this.amountPicker.currentView.model.getValue()[0],
+                //     unitValue: this.unitPicker.currentView.model.getValue()[0],
+                //     startValue: this.startPicker.currentView.model.getValue()[0],
+                //     endValue: this.endPicker.currentView.model.getValue()[0]
+                // }
+                isScheduled: this.enableScheduling.currentView.model.getValue()[0],
+                scheduleAmount: this.amountPicker.currentView.model.getValue()[0],
+                scheduleUnit: this.unitPicker.currentView.model.getValue()[0],
+                scheduleStart: this.startPicker.currentView.model.getValue()[0],
+                scheduleEnd: this.endPicker.currentView.model.getValue()[0]
             };
 
             // var amountValue = this.amountPicker.currentView.model.getValue()[0];

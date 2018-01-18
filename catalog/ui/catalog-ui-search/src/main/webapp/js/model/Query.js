@@ -83,8 +83,12 @@ define([
                     serverPageIndex: 0,
                     isAdvanced: false,
                     isLocal: false,
-                    isScheduleEnabled: false,
-                    scheduleOptions: { amountValue: 1, unitValue: 'weeks', startValue: '', endValue: '' }
+                    isScheduled: false,
+                    //scheduleOptions: { amountValue: 1, unitValue: 'weeks', startValue: '', endValue: '' }
+                    scheduleAmount: 1,
+                    scheduleUnit: 'weeks',
+                    scheduleStart: '',
+                    scheduleEnd: ''
                 };
             },
             isLocal: function() {
