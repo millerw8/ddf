@@ -27,9 +27,10 @@ define([
     'component/property/property',
     'component/singletons/user-instance',
     'component/sort-item/sort-item.view',
+    'component/query-schedule/query-schedule.view',
     'js/Common'
 ], function (Marionette, Backbone, _, $, template, CustomElements, store, DropdownModel,
-            QuerySrcView, PropertyView, Property, user, SortItemView, Common) {
+            QuerySrcView, PropertyView, Property, user, SortItemView, ScheduleQueryView, Common) {
 
     return Marionette.LayoutView.extend({
         template: template,
@@ -44,7 +45,8 @@ define([
         },
         regions: {
             settingsSortField: '.settings-sorting-field',
-            settingsSrc: '.settings-src'
+            settingsSrc: '.settings-src',
+            settingsSchedule: '.settings-scheduling'
         },
         ui: {
         },
@@ -57,6 +59,7 @@ define([
         onBeforeShow: function(){
             this.setupSortFieldDropdown();
             this.setupSrcDropdown();
+            this.setupScheduling();
             this.turnOnEditing();
         },
         setupSortFieldDropdown: function() {
@@ -81,6 +84,20 @@ define([
                 model: this._srcDropdownModel
             }));
             this.settingsSrc.currentView.turnOffEditing();
+        },
+        setupScheduling: function() {
+            this.settingsSchedule.show(new ScheduleQueryView({
+                model: new Backbone.Model({
+                    isScheduleEnabled: this.model.get('isScheduleEnabled'),
+                    scheduleOptions: {
+                        amountValue: this.model.get('scheduleOptions').amountValue,
+                        unitValue: this.model.get('scheduleOptions').unitValue,
+                        startValue: this.model.get('scheduleOptions').startValue,
+                        endValue: this.model.get('scheduleOptions').endValue
+                    }
+                })
+            }));
+            this.settingsSchedule.currentView.turnOffEditing();
         },
         turnOnEditing: function(){
            this.$el.addClass('is-editing');
@@ -107,11 +124,14 @@ define([
             }
             var sortField = this.settingsSortField.currentView.getSortField();
             var sortOrder = this.settingsSortField.currentView.getSortOrder();
+            var scheduleConfig = this.settingsSchedule.currentView.getSchedulingConfiguration();
             this.model.set({
                 src: src,
                 federation: federation,
                 sortField: sortField,
-                sortOrder: sortOrder
+                sortOrder: sortOrder,
+                isScheduleEnabled: scheduleConfig.isScheduleEnabled,
+                scheduleOptions: scheduleConfig.scheduleOptions
             });
         },
         save: function(){

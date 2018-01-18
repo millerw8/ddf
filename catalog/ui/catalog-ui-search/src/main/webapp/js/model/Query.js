@@ -82,7 +82,9 @@ define([
                     result: undefined,
                     serverPageIndex: 0,
                     isAdvanced: false,
-                    isLocal: false
+                    isLocal: false,
+                    isScheduleEnabled: false,
+                    scheduleOptions: { amountValue: 1, unitValue: 'weeks', startValue: '', endValue: '' }
                 };
             },
             isLocal: function() {
