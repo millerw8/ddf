@@ -95,7 +95,7 @@ define([
                     //     startValue: this.model.get('scheduleOptions').startValue,
                     //     endValue: this.model.get('scheduleOptions').endValue
                     // }
-                    isScheduled: this.model.get('isScheduled'),
+                    isScheduled: (this.model.get('isScheduled') ? 'on' : 'off'),
                     scheduleAmount: this.model.get('scheduleAmount'),
                     scheduleUnit: this.model.get('scheduleUnit'),
                     scheduleStart: this.model.get('scheduleStart'),
@@ -137,7 +137,7 @@ define([
                 sortOrder: sortOrder,
                 // isScheduleEnabled: scheduleConfig.isScheduleEnabled,
                 // scheduleOptions: scheduleConfig.scheduleOptions
-                isScheduled: scheduleConfig.isScheduled,
+                isScheduled: scheduleConfig.isScheduled === 'on',
                 scheduleAmount: scheduleConfig.scheduleAmount,
                 scheduleUnit: scheduleConfig.scheduleUnit,
                 scheduleStart: scheduleConfig.scheduleStart,
