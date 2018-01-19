@@ -356,4 +356,11 @@
             <type>xml</type>
         </dependency>
     </dependencies>
+
+    <repositories>
+        <repository>
+            <id>ignite-schedule-impl</id>
+            <url>file://${project.basedir}/src/main/resources/ignite-schedule-impl</url>
+        </repository>
+    </repositories>
 </project>
