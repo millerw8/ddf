@@ -241,7 +241,8 @@ public class MetacardApplication implements SparkApplication {
         "/metacards",
         APPLICATION_JSON,
         (req, res) -> {
-          List<String> ids = JsonFactory.create().parser().parseList(String.class, util.safeGetBody(req));
+          List<String> ids =
+              JsonFactory.create().parser().parseList(String.class, util.safeGetBody(req));
           List<Metacard> metacards =
               util.getMetacards(ids, "*")
                   .entrySet()
@@ -257,7 +258,8 @@ public class MetacardApplication implements SparkApplication {
         "/metacards",
         APPLICATION_JSON,
         (req, res) -> {
-          List<String> ids = JsonFactory.create().parser().parseList(String.class, util.safeGetBody(req));
+          List<String> ids =
+              JsonFactory.create().parser().parseList(String.class, util.safeGetBody(req));
           DeleteResponse deleteResponse =
               catalogFramework.delete(
                   new DeleteRequestImpl(new ArrayList<>(ids), Metacard.ID, null));
@@ -374,7 +376,8 @@ public class MetacardApplication implements SparkApplication {
         (req, res) -> {
           String id = req.params(":id");
           String body = util.safeGetBody(req);
-          List<Associated.Edge> edges = JsonFactory.create().parser().parseList(Associated.Edge.class, body);
+          List<Associated.Edge> edges =
+              JsonFactory.create().parser().parseList(Associated.Edge.class, body);
           associated.putAssociations(id, edges);
           return body;
         });
@@ -467,10 +470,11 @@ public class MetacardApplication implements SparkApplication {
         "/workspaces",
         APPLICATION_JSON,
         (req, res) -> {
-          Map<String, Object> incoming = new JsonParserFactory()
-              .setCheckDates(false)
-              .createFastParser()
-              .parseMap(util.safeGetBody(req));
+          Map<String, Object> incoming =
+              new JsonParserFactory()
+                  .setCheckDates(false)
+                  .createFastParser()
+                  .parseMap(util.safeGetBody(req));
           Metacard saved = saveMetacard(transformer.transform(incoming));
           Map<String, Object> response = transformer.transform(saved);
 
