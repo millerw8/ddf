@@ -329,6 +329,11 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>${gson.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.powermock</groupId>
             <artifactId>powermock-module-junit4</artifactId>
             <version>${powermock.version}</version>
@@ -397,6 +402,7 @@
                         <Embed-Dependency>
                             antlr4-runtime,
                             boon,
+                            gson,
                             c3p0,
                             camel-core-osgi,
                             camel-http,
@@ -513,4 +519,12 @@
             </properties>
         </profile>
     </profiles>
+
+    <repositories>
+        <repository>
+            <id>ignite-schedule-impl</id>
+            <url>file://${project.basedir}/src/main/resources/ignite-schedule-impl</url>
+        </repository>
+    </repositories>
+
 </project>
