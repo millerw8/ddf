@@ -67,7 +67,6 @@ define([
             this.updatePosition();
             this.addResizeHandler();
         },
-<<<<<<< HEAD
         updatePosition: function () {
             let datepicker = $('body').find('.bootstrap-datetimepicker-widget:last');
             let inputCoordinates = this.$el.find('.input-group.date')[0].getBoundingClientRect();
@@ -78,14 +77,6 @@ define([
                 'left': inputCoordinates.left + 'px',
                 'width': inputCoordinates.width + 'px'
             });
-=======
-        updatePosition: function(){
-            var inputCoordinates = this.$el.find('.input-group.date')[0].getBoundingClientRect();
-            console.log(inputCoordinates);
-            $('body > .bootstrap-datetimepicker-widget').css('left', inputCoordinates.left)
-                .css('top', inputCoordinates.top + inputCoordinates.height)
-                .css('width', inputCoordinates.width);
->>>>>>> Added Query Scheduling to Intrigue
         },
         addResizeHandler: function(){
             $(window).on('resize.datePicker', this.updatePosition.bind(this));

@@ -152,7 +152,7 @@ public class MetacardApplication implements SparkApplication {
   private static int pageSize = 250;
   private final ObjectMapper mapper =
       JsonFactory.create(
-          new JsonParserFactory().usePropertyOnly().setCheckDates(false),
+          new JsonParserFactory().usePropertyOnly(),
           new JsonSerializerFactory()
               .includeEmpty()
               .includeNulls()
@@ -241,7 +241,7 @@ public class MetacardApplication implements SparkApplication {
         "/metacards",
         APPLICATION_JSON,
         (req, res) -> {
-          List<String> ids = mapper.parser().parseList(String.class, util.safeGetBody(req));
+          List<String> ids = JsonFactory.create().parser().parseList(String.class, util.safeGetBody(req));
           List<Metacard> metacards =
               util.getMetacards(ids, "*")
                   .entrySet()
@@ -257,7 +257,7 @@ public class MetacardApplication implements SparkApplication {
         "/metacards",
         APPLICATION_JSON,
         (req, res) -> {
-          List<String> ids = mapper.parser().parseList(String.class, util.safeGetBody(req));
+          List<String> ids = JsonFactory.create().parser().parseList(String.class, util.safeGetBody(req));
           DeleteResponse deleteResponse =
               catalogFramework.delete(
                   new DeleteRequestImpl(new ArrayList<>(ids), Metacard.ID, null));
@@ -374,7 +374,7 @@ public class MetacardApplication implements SparkApplication {
         (req, res) -> {
           String id = req.params(":id");
           String body = util.safeGetBody(req);
-          List<Associated.Edge> edges = mapper.parser().parseList(Associated.Edge.class, body);
+          List<Associated.Edge> edges = JsonFactory.create().parser().parseList(Associated.Edge.class, body);
           associated.putAssociations(id, edges);
           return body;
         });
@@ -467,7 +467,10 @@ public class MetacardApplication implements SparkApplication {
         "/workspaces",
         APPLICATION_JSON,
         (req, res) -> {
-          Map<String, Object> incoming = mapper.parser().parseMap(util.safeGetBody(req));
+          Map<String, Object> incoming = new JsonParserFactory()
+              .setCheckDates(false)
+              .createFastParser()
+              .parseMap(util.safeGetBody(req));
           Metacard saved = saveMetacard(transformer.transform(incoming));
           Map<String, Object> response = transformer.transform(saved);
 
@@ -482,18 +485,11 @@ public class MetacardApplication implements SparkApplication {
           String id = req.params(":id");
 
           Map<String, Object> workspace =
-              //              new
-              // JsonParserFactory().setCheckDates(false).createFastParser().parseMap(util.safeGetBody(req));
-              mapper.parser().parseMap(util.safeGetBody(req));
+              new JsonParserFactory()
+                  .setCheckDates(false)
+                  .createFastParser()
+                  .parseMap(util.safeGetBody(req));
 
-          //          Gson gson =
-          //              new GsonBuilder()
-          //                  .setLongSerializationPolicy(LongSerializationPolicy.STRING)
-          //                  .serializeNulls()
-          //                  .create();
-          //          Type type = new TypeToken<Map<String, Object>>() {}.getType();
-          //          Map<String, Object> workspace = gson.fromJson(util.safeGetBody(req),
-          // Map.class);
           Metacard metacard = transformer.transform(workspace);
           metacard.setAttribute(new AttributeImpl(Metacard.ID, id));
 
