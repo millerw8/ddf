@@ -13,6 +13,9 @@
  */
 package ddf.util;
 
+import static ddf.util.Fallible.*;
+
+import com.sun.istack.internal.Nullable;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -123,5 +126,19 @@ public class MapUtils {
   public static <Element, Key, Value> Map<Key, Value> fromList(
       List<Element> list, Function<Element, Key> keyMaker, Function<Element, Value> valueMaker) {
     return list.stream().collect(Collectors.toMap(keyMaker, valueMaker));
+  }
+
+  public static <Key, MapValue, Casted extends MapValue> Fallible<Casted> tryGet(
+      Map<Key, MapValue> map, Key key, Class<Casted> expectedClass) {
+    final @Nullable MapValue mapValue = map.get(key);
+    if (mapValue == null) {
+      return error("This map has no key \"%s\"!", key);
+    } else if (!expectedClass.isInstance(mapValue)) {
+      return error(
+          "This map's value corresponding to \"%s\" is not an instance of %s!",
+          key, expectedClass.getName());
+    } else {
+      return of(expectedClass.cast(mapValue));
+    }
   }
 }
