@@ -166,7 +166,9 @@ public class QuerySchedulingPostIngestPlugin implements PostIngestPlugin {
       return error("A task cannot be executed every %d %s!", scheduleInterval, scheduleUnit);
     }
 
+    DateTime now = DateTime.now();
     DateTime start;
+    DateTime end;
     try {
       start = DateTime.parse(scheduleStartString, ISO_8601_DATE_FORMAT);
     } catch (DateTimeParseException exception) {
@@ -174,6 +176,16 @@ public class QuerySchedulingPostIngestPlugin implements PostIngestPlugin {
           "The start date attribute of this metacard, \"%s\", could not be parsed: %s",
           scheduleStartString, exception.getMessage());
     }
+    try {
+      end = DateTime.parse(scheduleEndString, ISO_8601_DATE_FORMAT);
+    } catch (DateTimeParseException exception) {
+      return error(
+          "The end date attribute of this metacard, \"%s\", could not be parsed: %s",
+          scheduleStartString, exception.getMessage());
+    }
+
+    long nowStartDiff = start.minus(now.getMillis()).getMillis();
+    long startEndDiff = end.minus(start.getMillis()).getMillis();
 
     RepetitionTimeUnit unit;
     try {
@@ -184,21 +196,67 @@ public class QuerySchedulingPostIngestPlugin implements PostIngestPlugin {
           scheduleUnit);
     }
 
+    final long unitsBeforeWeStart;
+    final long unitsBeforeWeEnd;
+    switch (unit) {
+      case MINUTES:
+        unitsBeforeWeStart = nowStartDiff / (1000L * 60L);
+        unitsBeforeWeEnd = 1 + unitsBeforeWeStart + startEndDiff / (1000L * 60L);
+        break;
+      case HOURS:
+        unitsBeforeWeStart = nowStartDiff / (1000L * 60L * 60L);
+        unitsBeforeWeEnd = 1 + unitsBeforeWeStart + startEndDiff / (1000L * 60L * 60L);
+        break;
+      case DAYS:
+        unitsBeforeWeStart = nowStartDiff / (1000L * 60L * 60L * 24L);
+        unitsBeforeWeEnd = 1 + unitsBeforeWeStart + startEndDiff / (1000L * 60L * 60L * 24L);
+        break;
+      case WEEKS:
+        unitsBeforeWeStart = nowStartDiff / (1000L * 60L * 60L * 24L * 7L);
+        unitsBeforeWeEnd = 1 + unitsBeforeWeStart + startEndDiff / (1000L * 60L * 60L * 24L * 7L);
+        break;
+      case MONTHS:
+        // TODO: Months need some work because days/month varies
+        unitsBeforeWeStart = unitsBeforeWeEnd = 1;
+        //        unitsBeforeWeStart = 1 + nowStartDiff / (1000L * 60L * 60L * 24L * 7L * 12L);
+        //        unitsBeforeWeEnd = unitsBeforeWeStart + startEndDiff / (1000L * 60L * 60L * 24L *
+        // 7L * (end.getDayOfYear() - start.getDayOfYear()));
+        break;
+      case YEARS:
+        unitsBeforeWeStart = nowStartDiff / (1000L * 60L * 60L * 24L * 365L);
+        unitsBeforeWeEnd = 1 + unitsBeforeWeStart + startEndDiff / (1000L * 60L * 60L * 24L * 365L);
+        break;
+      default:
+        unitsBeforeWeStart = 1;
+        unitsBeforeWeEnd = 1;
+        break;
+    }
+
+    LOGGER.warn(
+        "We'll be repeating this {} times...",
+        Math.ceil((unitsBeforeWeEnd - unitsBeforeWeStart) / scheduleInterval));
+
     final QuerySchedulingPostIngestPlugin thisPlugin = this;
     final SchedulerFuture<?> job =
         scheduler.scheduleLocal(
             new Runnable() {
-              private int unitsPassedSinceLastRun = 0;
+              private long unitsPassedSinceStarted = 0;
 
               @Override
               public void run() {
                 // TODO: Figure out how to cancel the job when the end date-time is reached.
-                if (unitsPassedSinceLastRun == scheduleInterval) {
-                  unitsPassedSinceLastRun = 0;
-                  thisPlugin.emailOwner(queryMetacardData).elseDo(LOGGER::error);
-                } else {
-                  unitsPassedSinceLastRun++;
+                if (unitsPassedSinceStarted >= unitsBeforeWeEnd) {
+                  LOGGER.warn("Ending scheduled query...");
+                  thisPlugin.cancelSchedule(queryMetacardData).elseDo(LOGGER::error);
+                  return;
                 }
+                if (unitsPassedSinceStarted >= unitsBeforeWeStart
+                    && (unitsPassedSinceStarted - unitsBeforeWeStart) % scheduleInterval == 0) {
+                  //                  unitsPassedSinceStarted = 0;
+                  thisPlugin.emailOwner(queryMetacardData).elseDo(LOGGER::error);
+                } // else {
+                unitsPassedSinceStarted++;
+                //                }
               }
             },
             unit.makeCronToRunEachUnit(
