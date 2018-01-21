@@ -8,7 +8,6 @@ import com.google.common.annotations.VisibleForTesting;
 import ddf.catalog.CatalogFramework;
 import ddf.catalog.Constants;
 import ddf.catalog.data.Metacard;
-import ddf.catalog.federation.FederationException;
 import ddf.catalog.operation.CreateResponse;
 import ddf.catalog.operation.DeleteResponse;
 import ddf.catalog.operation.Query;
@@ -21,8 +20,7 @@ import ddf.catalog.operation.impl.QueryImpl;
 import ddf.catalog.operation.impl.QueryRequestImpl;
 import ddf.catalog.plugin.PluginExecutionException;
 import ddf.catalog.plugin.PostIngestPlugin;
-import ddf.catalog.source.SourceUnavailableException;
-import ddf.catalog.source.UnsupportedQueryException;
+import ddf.security.Subject;
 import ddf.util.Fallible;
 import ddf.util.MapUtils;
 import java.time.format.DateTimeParseException;
@@ -48,6 +46,7 @@ import org.codice.ddf.catalog.ui.metacard.workspace.WorkspaceAttributes;
 import org.codice.ddf.catalog.ui.metacard.workspace.WorkspaceMetacardImpl;
 import org.codice.ddf.catalog.ui.metacard.workspace.WorkspaceTransformer;
 import org.codice.ddf.catalog.ui.query.monitor.email.EmailNotifier;
+import org.codice.ddf.security.common.Security;
 import org.geotools.filter.text.cql2.CQLException;
 import org.geotools.filter.text.ecql.ECQL;
 import org.joda.time.DateTime;
@@ -67,6 +66,8 @@ public class QuerySchedulingPostIngestPlugin implements PostIngestPlugin {
 
   private static final org.joda.time.format.DateTimeFormatter ISO_8601_DATE_FORMAT =
       DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZ").withZoneUTC();
+
+  private static final Security SECURITY = Security.getInstance();
 
   private static Fallible<IgniteScheduler> scheduler =
       error(
@@ -276,20 +277,47 @@ public class QuerySchedulingPostIngestPlugin implements PostIngestPlugin {
               final QueryRequest queryRequest = new QueryRequestImpl(query, true);
 
               QueryResponse queryResults;
-              try {
-                queryResults = catalogFramework.query(queryRequest);
-              } catch (UnsupportedQueryException exception) {
-                return error(
-                    "The query \"%s\" is not supported by the given catalog framework: %s",
-                    cqlQuery, exception.getMessage());
-              } catch (SourceUnavailableException exception) {
-                return error(
-                    "The catalog framework sources were unavailable: " + exception.getMessage());
-              } catch (FederationException exception) {
-                return error(
-                    "There was a problem with executing a federated search for the query \"%s\": %s",
-                    cqlQuery, exception.getMessage());
-              }
+              //              try {
+              Subject systemSubject = SECURITY.runAsAdmin(SECURITY::getSystemSubject);
+              queryResults = systemSubject.execute(() -> catalogFramework.query(queryRequest));
+              //                  {
+              //                  try {
+              //                    catalogFramework.query(queryRequest);
+              //                  } catch (UnsupportedQueryException exception) {
+              //                    return error(
+              //                        "The query \"%s\" is not supported by the given catalog
+              // framework: %s",
+              //                    cqlQuery, exception.getMessage());
+              //                  } catch (SourceUnavailableException exception) {
+              //                    return error(
+              //                        "The catalog framework sources were unavailable: " +
+              //                            exception.getMessage());
+              //                  } catch (FederationException exception) {
+              //                    return error(
+              //                        "There was a problem with executing a federated search for
+              // the query \"%s\": %s",
+              //                        cqlQuery, exception.getMessage());
+              //                  }
+              //                }
+              //              ));
+              //                            } catch (UnsupportedQueryException exception) {
+              //                              return error(
+              //                                  "The query \"%s\" is not supported by the given
+              // catalog
+              //               framework: %s",
+              //                                  cqlQuery, exception.getMessage());
+              //                            } catch (SourceUnavailableException exception) {
+              //                              return error(
+              //                                  "The catalog framework sources were unavailable: "
+              // +
+              //               exception.getMessage());
+              //                            } catch (FederationException exception) {
+              //                              return error(
+              //                                  "There was a problem with executing a federated
+              // search for the
+              //               query \"%s\": %s",
+              //                                  cqlQuery, exception.getMessage());
+              //                            }
 
               final Map<String, Pair<WorkspaceMetacardImpl, Long>> notifiableQueryResults =
                   MapUtils.fromList(
@@ -430,7 +458,7 @@ public class QuerySchedulingPostIngestPlugin implements PostIngestPlugin {
 
     for (Metacard metacard : metacards) {
       // TODO TEMP
-      LOGGER.warn(
+      LOGGER.debug(
           String.format("Processing metacard of type %s...", metacard.getMetacardType().getName()));
       processMetacard(metacard, metacardAction)
           .elseDo(error -> errors.add(ImmutablePair.of(metacard, error)));
