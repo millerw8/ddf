@@ -27,12 +27,13 @@ import ddf.util.Fallible;
 import ddf.util.MapUtils;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import javax.annotation.Nullable;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
@@ -78,7 +79,7 @@ public class QuerySchedulingPostIngestPlugin implements PostIngestPlugin {
    * {@link Ignite} instance is available.
    */
   @VisibleForTesting
-  static Fallible<IgniteCache<String, SchedulerFuture<?>>> runningQueries =
+  static Fallible<Map<String, SchedulerFuture<?>>> runningQueries =
       error(
           "An Ignite cache has not been obtained for this query! Have any queries been started yet?");
 
@@ -98,6 +99,59 @@ public class QuerySchedulingPostIngestPlugin implements PostIngestPlugin {
 
     // TODO TEMP
     LOGGER.warn("Query scheduling plugin created!");
+  }
+
+  public enum RepetitionTimeUnit {
+    // To repeat each unit of time in a cron expression, fields will either need to be starred ("*")
+    // or filled with the value of that field in the start date-time.
+    // where "S" is the value of that field in the start date:
+    // every minute: * * * * *
+    // every hour:   S * * * *
+    // every day:    S S * * *
+    // every week:   S S * * S
+    // every month:  S S S * *
+    // every year:   S S S S *
+
+    MINUTES(),
+    HOURS(0),
+    DAYS(0, 1),
+    WEEKS(0, 1, 4),
+    MONTHS(0, 1, 2),
+    YEARS(0, 1, 2, 3);
+
+    private int[] cronFieldsThatShouldBeFilled;
+
+    RepetitionTimeUnit(int... cronFieldsThatShouldBeFilled) {
+      this.cronFieldsThatShouldBeFilled = cronFieldsThatShouldBeFilled;
+    }
+
+    public boolean cronFieldShouldBeFilled(int index) {
+      return IntStream.of(cronFieldsThatShouldBeFilled)
+          .anyMatch(cronFieldIndex -> cronFieldIndex == index);
+    }
+
+    public String makeCronToRunEachUnit(DateTime start) {
+      final String[] cronFields = new String[5];
+      final int[] startValues =
+          new int[] {
+            start.getMinuteOfHour(),
+            start.getHourOfDay(),
+            start.getDayOfMonth(),
+            start.getMonthOfYear(),
+            // Joda's day of the week value := 1-7 Monday-Sunday;
+            // cron's day of the week value := 0-6 Sunday-Saturday
+            start.getDayOfWeek() % 7
+          };
+      for (int i = 0; i < 5; i++) {
+        if (cronFieldShouldBeFilled(i)) {
+          cronFields[i] = String.valueOf(startValues[i]);
+        } else {
+          cronFields[i] = "*";
+        }
+      }
+
+      return String.join(" ", cronFields);
+    }
   }
 
   private Fallible<SchedulerFuture<?>> scheduleJob(
@@ -120,47 +174,14 @@ public class QuerySchedulingPostIngestPlugin implements PostIngestPlugin {
           scheduleStartString, exception.getMessage());
     }
 
-    // where "S" is the value of that field in the start date:
-    // every minute: * * * * *
-    // every hour:   S * * * *
-    // every day:    S S * * *
-    // every week:   S S * * S
-    // every month:  S S S * *
-    // every year:   S S S S *
-
-    final List<String> scheduleUnitsByFilledFields =
-        Arrays.asList("minutes", "hours", "days", "weeks", "months", "years");
-    final int numberOfFieldsToFill = scheduleUnitsByFilledFields.indexOf(scheduleUnit);
-    if (numberOfFieldsToFill < 0) {
+    RepetitionTimeUnit unit;
+    try {
+      unit = RepetitionTimeUnit.valueOf(scheduleUnit.toUpperCase());
+    } catch (IllegalArgumentException exception) {
       return error(
           "The unit of time \"%s\" for the scheduled query time interval is not recognized!",
           scheduleUnit);
     }
-
-    final int[] fieldFillOrder = new int[] {0, 1, 5, 2, 3};
-    final String[] cronFields = new String[5];
-    final int[] startValues =
-        new int[] {
-          start.getMinuteOfHour(),
-          start.getHourOfDay(),
-          start.getDayOfMonth(),
-          start.getMonthOfYear(),
-          // Joda's day of the week value := 1-7 Monday-Sunday;
-          // cron's day of the week value := 0-6 Sunday-Saturday
-          start.getDayOfWeek() % 7
-        };
-    for (int i = 0; i < 5; i++) {
-      if (fieldFillOrder[i] < numberOfFieldsToFill) {
-        cronFields[i] = String.valueOf(startValues[i]);
-      } else {
-        cronFields[i] = "*";
-      }
-    }
-    if (!scheduleUnit.equals("weeks")) {
-      cronFields[4] = "*";
-    }
-
-    final String every1UnitCron = String.join(" ", cronFields);
 
     final QuerySchedulingPostIngestPlugin thisPlugin = this;
     final SchedulerFuture<?> job =
@@ -170,7 +191,7 @@ public class QuerySchedulingPostIngestPlugin implements PostIngestPlugin {
 
               @Override
               public void run() {
-                // TODO: Figure out how to cancel the job when the end date/time is reached.
+                // TODO: Figure out how to cancel the job when the end date-time is reached.
                 if (unitsPassedSinceLastRun == scheduleInterval) {
                   unitsPassedSinceLastRun = 0;
                   thisPlugin.emailOwner(queryMetacardData).elseDo(LOGGER::error);
@@ -179,7 +200,8 @@ public class QuerySchedulingPostIngestPlugin implements PostIngestPlugin {
                 }
               }
             },
-            every1UnitCron);
+            unit.makeCronToRunEachUnit(
+                start)); // TODO: surround this in an IgniteException try-catch
 
     return of(job);
   }
@@ -292,7 +314,7 @@ public class QuerySchedulingPostIngestPlugin implements PostIngestPlugin {
     if (scheduler.hasError()) {
       final Ignite ignite = Ignition.ignite();
       scheduler = of(ignite.scheduler());
-      runningQueries = of(ignite.getOrCreateCache(QUERIES_CACHE_NAME));
+      runningQueries = of(new HashMap<>());
     }
 
     return scheduler.tryMap(
@@ -334,7 +356,7 @@ public class QuerySchedulingPostIngestPlugin implements PostIngestPlugin {
                                     return error(
                                         "This job scheduled under the ID \"%s\" was not found in the scheduled queries job cache!",
                                         id);
-                                  } else if (!job.isCancelled()) {
+                                  } else if (job.isCancelled()) {
                                     return error(
                                         "This job scheduled under the ID \"%s\" cannot be cancelled because it is not running!",
                                         id);
