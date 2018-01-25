@@ -16,8 +16,9 @@ define([
     'component/workspace-explore/workspace-explore.view',
     'component/workspace-saved/workspace-saved.view',
     'component/results/results.view',
-    'component/workspace-search/workspace-search.view'
-], function (_, Tabs, workspaceExploreView, workspaceSavedView, resultsView, WorkspaceSearchView) {
+    'component/workspace-search/workspace-search.view',
+    'component/workspace-lists/workspace-lists.view'
+], function (_, Tabs, workspaceExploreView, workspaceSavedView, resultsView, WorkspaceSearchView, WorkspaceListsView) {
     
     var WorkspaceContentTabs = Tabs.extend({
         defaults: {
@@ -25,7 +26,8 @@ define([
                 'Search': WorkspaceSearchView,
            //     'Searches': workspaceExploreView,
              //   'Results': resultsView,
-                'Bookmarks': workspaceSavedView
+              //  'Bookmarks': workspaceSavedView,
+                'Lists': WorkspaceListsView
             }
         }
     });

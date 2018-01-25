@@ -136,6 +136,9 @@ define([
                 return _.pick(data, 'src', 'start', 'count', 'timeout', 'cql', 'sort', 'id');
             },
             startSearch: function (options) {
+                if (this.get('cql') === '') {
+                    return;
+                }
                 options = _.extend({
                     limitToDeleted: false,
                     limitToHistoric: false
