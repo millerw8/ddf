@@ -82,8 +82,14 @@ define([
                     sortOrder: 'descending',
                     result: undefined,
                     serverPageIndex: 0,
-                    type: 'text',
-                    isLocal: false
+                    type: text,
+                    isLocal: false,
+                    isScheduled: false,
+                    //scheduleOptions: { amountValue: 1, unitValue: 'weeks', startValue: '', endValue: '' }
+                    scheduleAmount: 1,
+                    scheduleUnit: 'weeks',
+                    scheduleStart: '',
+                    scheduleEnd: ''
                 }, user.getQuerySettings().toJSON());
             },
             resetToDefaults: function() {
