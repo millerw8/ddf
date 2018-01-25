@@ -18,8 +18,8 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class Fallible<Value> {
-  private @Nullable String error;
-  private @Nullable Value value;
+  private String error;
+  private Value value;
 
   private Fallible(String error, Value value) {
     this.error = error;

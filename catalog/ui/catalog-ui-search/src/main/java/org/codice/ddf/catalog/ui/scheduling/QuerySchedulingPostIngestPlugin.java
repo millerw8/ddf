@@ -1,3 +1,16 @@
+/**
+ * Copyright (c) Codice Foundation
+ *
+ * <p>This is free software: you can redistribute it and/or modify it under the terms of the GNU
+ * Lesser General Public License as published by the Free Software Foundation, either version 3 of
+ * the License, or any later version.
+ *
+ * <p>This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Lesser General Public License for more details. A copy of the GNU Lesser General Public
+ * License is distributed along with this program and can be found at
+ * <http://www.gnu.org/licenses/lgpl.html>.
+ */
 package org.codice.ddf.catalog.ui.scheduling;
 
 import static ddf.util.Fallible.error;
@@ -32,11 +45,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-import javax.annotation.Nullable;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.ignite.Ignite;
-import org.apache.ignite.IgniteCache;
 import org.apache.ignite.IgniteScheduler;
 import org.apache.ignite.IgniteState;
 import org.apache.ignite.Ignition;
@@ -74,10 +85,10 @@ public class QuerySchedulingPostIngestPlugin implements PostIngestPlugin {
           "An Ignite scheduler has not been obtained for this query! Have any queries been started yet?");
 
   /**
-   * This {@link IgniteCache} relates metacards to running {@link Ignite} scheduled jobs. Keys are
-   * metacard IDs (unique identifiers of metacards) while values are running {@link Ignite} jobs.
-   * This {@link IgniteCache} will become available as soon as a job is scheduled if a running
-   * {@link Ignite} instance is available.
+   * This {@link org.apache.ignite.IgniteCache} relates metacards to running {@link Ignite}
+   * scheduled jobs. Keys are metacard IDs (unique identifiers of metacards) while values are
+   * running {@link Ignite} jobs. This {@link org.apache.ignite.IgniteCache} will become available
+   * as soon as a job is scheduled if a running {@link Ignite} instance is available.
    */
   @VisibleForTesting
   static Fallible<Map<String, SchedulerFuture<?>>> runningQueries =
@@ -437,7 +448,7 @@ public class QuerySchedulingPostIngestPlugin implements PostIngestPlugin {
                         MapUtils.tryGet(queryMetacardData, Metacard.ID, String.class)
                             .tryMap(
                                 id -> {
-                                  final @Nullable SchedulerFuture<?> job = runningQueries.get(id);
+                                  final SchedulerFuture<?> job = runningQueries.get(id);
                                   if (job == null) {
                                     return error(
                                         "This job scheduled under the ID \"%s\" was not found in the scheduled queries job cache!",

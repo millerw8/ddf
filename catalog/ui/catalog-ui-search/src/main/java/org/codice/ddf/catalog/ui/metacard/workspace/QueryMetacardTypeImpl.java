@@ -152,15 +152,15 @@ public class QueryMetacardTypeImpl extends MetacardTypeImpl {
             false /* multivalued */,
             BasicTypes.STRING_TYPE));
 
-      QUERY_DESCRIPTORS.add(
-            new AttributeDescriptorImpl(
+    QUERY_DESCRIPTORS.add(
+        new AttributeDescriptorImpl(
             QUERY_IS_ADVANCED,
             false /* indexed */,
             true /* stored */,
             false /* tokenized */,
             false /* multivalued */,
             BasicTypes.BOOLEAN_TYPE));
-      
+
     QUERY_DESCRIPTORS.add(
         new AttributeDescriptorImpl(
             QUERY_IS_SCHEDULED,

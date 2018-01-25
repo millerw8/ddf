@@ -13,7 +13,10 @@
  */
 package org.codice.ddf.catalog.ui.security.cron;
 
-import static ddf.util.Fallible.*;
+import static ddf.util.Fallible.error;
+import static ddf.util.Fallible.of;
+import static ddf.util.Fallible.ofNullable;
+import static ddf.util.Fallible.success;
 
 import com.google.common.annotations.VisibleForTesting;
 import ddf.catalog.Constants;
@@ -250,8 +253,7 @@ public class CronQuery extends CronQueryJson implements Runnable {
             job.cancel();
             return runningQueries.tryMap(
                 runningQueries -> {
-                  final @Nullable Map<String, CronQuery> usersQueries =
-                      runningQueries.get(getUsername());
+                  final Map<String, CronQuery> usersQueries = runningQueries.get(getUsername());
                   if (usersQueries == null || !usersQueries.containsKey(getJobID())) {
                     return error("This %s was not found in the scheduled queries cache!", this);
                   }
