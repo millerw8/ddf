@@ -95,10 +95,12 @@ define([
                     id: 'Schedule',
                     radio: [{
                         label: 'On',
-                        value: 'on'
+                        value: 'on',
+                        title: 'Activate Query Scheduling'
                     }, {
                         label: 'Off',
-                        value: 'off'
+                        value: 'off',
+                        title: 'Deactivate Query Scheduling'
                     }]
                 })
             }));
