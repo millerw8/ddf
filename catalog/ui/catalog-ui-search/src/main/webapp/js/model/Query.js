@@ -82,7 +82,7 @@ define([
                     sortOrder: 'descending',
                     result: undefined,
                     serverPageIndex: 0,
-                    type: text,
+                    type: 'text',
                     isLocal: false,
                     isScheduled: false,
                     //scheduleOptions: { amountValue: 1, unitValue: 'weeks', startValue: '', endValue: '' }
