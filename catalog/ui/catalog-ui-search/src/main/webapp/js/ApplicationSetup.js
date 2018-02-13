@@ -90,11 +90,11 @@ require([
             message = jqxhr.responseJSON.message;
         }
 
-        announcement.announce({
-            title: response.title,
-            message: message || response.message,
-            type: 'error'
-        });
+        //announcement.announce({
+        //    title: response.title,
+        //    message: message || response.message,
+        //    type: 'error'
+        //});
 
     });
 
