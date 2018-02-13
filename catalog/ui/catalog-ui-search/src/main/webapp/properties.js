@@ -90,7 +90,12 @@ define(function (require) {
             this.handleFeedback();
             this.handleExperimental();
             this.handleUpload();
+            this.handleListTemplates();
+
             return props;
+        },
+        handleListTemplates: function() {
+            this.listTemplates = this.listTemplates.map((template) => JSON.parse(template));
         },
         handleEditing: function(){
             $('html').toggleClass('is-editing-restricted', this.isEditingRestricted());
