@@ -19,7 +19,6 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
-
 import javax.annotation.Nullable;
 
 /** Maps Metacards to WFS Features. */

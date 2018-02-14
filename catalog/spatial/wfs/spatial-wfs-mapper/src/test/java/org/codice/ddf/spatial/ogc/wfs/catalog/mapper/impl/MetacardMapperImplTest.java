@@ -184,10 +184,12 @@ public class MetacardMapperImplTest {
 
   @Test
   public void testGetEntry() {
-    Optional optionalEntry = metacardMapper.getEntry(e -> e.getFeatureProperty().equals(FEATURE_NAME));
+    Optional optionalEntry =
+        metacardMapper.getEntry(e -> e.getFeatureProperty().equals(FEATURE_NAME));
     assertThat(optionalEntry.isPresent(), is(true));
 
-    optionalEntry = metacardMapper.getEntry(e -> e.getFeatureProperty().equals(NON_EXISTENT_FEATURE));
+    optionalEntry =
+        metacardMapper.getEntry(e -> e.getFeatureProperty().equals(NON_EXISTENT_FEATURE));
     assertThat(optionalEntry.isPresent(), is(false));
 
     optionalEntry = metacardMapper.getEntry(null);
